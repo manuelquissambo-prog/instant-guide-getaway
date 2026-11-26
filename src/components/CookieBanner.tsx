@@ -32,7 +32,7 @@ export function CookieBanner() {
     <div ref={ref} tabIndex={-1} role="region" aria-label="Cookie consent" className="fixed inset-x-3 bottom-3 z-[60] mx-auto max-w-lg rounded-2xl border border-gold bg-card p-5 text-card-foreground shadow-soft outline-none">
       {!settings ? (
         <>
-          <p className="text-sm">We count visits without cookies. If you accept, we also measure clicks and other actions, and use advertising cookies to measure and improve our ads. <a href="#" className="underline">Privacy Policy</a></p>
+          <p className="text-sm">We count visits without cookies. If you accept, we also measure clicks and other actions, and use advertising cookies to measure and improve our ads. <a href="/privacy" className="underline">Privacy Policy</a></p>
           <div className="mt-4 flex gap-2">
             <button type="button" className={btn} onClick={() => all("denied")}>Reject all</button>
             <button type="button" className={btn} onClick={() => all("granted")}>Accept all</button>

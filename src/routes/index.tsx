@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AlertTriangle, MessageSquareWarning, Compass, Download, ListChecks, PartyPopper, Heart, ShieldCheck, Lock, User } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -8,6 +8,9 @@ import { Petals } from "@/components/landing/Petals";
 import { Donut } from "@/components/landing/Donut";
 import { BookMockup } from "@/components/landing/BookMockup";
 import { OLD_PRICE, PRICE, SHOW_TESTIMONIALS } from "@/lib/checkout";
+
+// Replace with your photo URL to show it in the About the author section.
+const AUTHOR_PHOTO_URL = "";
 
 const TITLE = "Wedding on a Budget | Plan Your Day for Under $10,000";
 const DESC = "The simple step-by-step ebook that shows engaged couples where to spend, where to save, and how to plan a beautiful wedding for under $10,000.";
@@ -200,7 +203,7 @@ function Index() {
               ))}
             </ul>
             <CTAButton className="mt-8 w-full" />
-            <p className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground"><Lock className="h-4 w-4" />Secure checkout · Instant delivery by email</p>
+            <p className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground"><Lock className="h-4 w-4 shrink-0" />Secure checkout · Instant delivery by email · 7-Day Money-Back Guarantee</p>
           </Reveal>
         </section>
 
@@ -217,10 +220,14 @@ function Index() {
         {/* Author */}
         <section className="bg-blush px-4 py-20">
           <Reveal className="mx-auto flex max-w-3xl flex-col items-center gap-8 sm:flex-row">
-            <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full border-2 border-gold bg-card"><User className="h-14 w-14 text-muted-foreground" /></div>
+            {AUTHOR_PHOTO_URL ? (
+              <img src={AUTHOR_PHOTO_URL} alt="Author of Wedding on a Budget" loading="lazy" className="h-32 w-32 shrink-0 rounded-full border-2 border-gold object-cover" />
+            ) : (
+              <div role="img" aria-label="Author photo placeholder" className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full border-2 border-gold bg-card"><User className="h-14 w-14 text-muted-foreground" /></div>
+            )}
             <div className="text-center sm:text-left">
               <h2 className="text-3xl font-bold">About the author</h2>
-              <p className="mt-3 text-lg text-muted-foreground">[WRITE 2-3 LINES ABOUT WHY YOU CREATED THIS GUIDE]</p>
+              <p className="mt-3 text-lg text-muted-foreground">I created Wedding on a Budget after seeing how many couples feel pressured to overspend on their big day. This guide gives you a clear, simple plan to celebrate beautifully while staying in control of your money.</p>
             </div>
           </Reveal>
         </section>
@@ -250,9 +257,9 @@ function Index() {
 
       <footer className="px-4 py-10 text-center text-sm text-muted-foreground">
         <nav className="flex flex-wrap justify-center gap-6">
-          <a href="#" className="hover:text-primary">Privacy Policy</a>
-          <a href="#" className="hover:text-primary">Terms of Use</a>
-          <a href="mailto:[YOUR EMAIL]" className="hover:text-primary">Contact ([YOUR EMAIL])</a>
+          <Link to="/privacy" className="hover:text-primary">Privacy Policy</Link>
+          <Link to="/terms" className="hover:text-primary">Terms of Use</Link>
+          <Link to="/contact" className="hover:text-primary">Contact</Link>
           <button type="button" onClick={() => window.dispatchEvent(new Event("open-cookie-settings"))} className="hover:text-primary">Cookie settings</button>
         </nav>
         <p className="mt-4">© 2026 Wedding on a Budget. All rights reserved.</p>

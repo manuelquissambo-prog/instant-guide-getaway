@@ -54,6 +54,27 @@ function initPixel() {
   loadScript();
   dispatch("init", PIXEL_ID, {}, { agent: "lovable" });
   dispatch("track", "PageView");
+  dispatch("track", "ViewContent", { content_name: "Wedding on a Budget" });
+  watchScrollDepth();
+}
+
+let scrollWatched = false;
+function watchScrollDepth() {
+  if (scrollWatched) return;
+  scrollWatched = true;
+  const onScroll = () => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    if (max > 0 && window.scrollY / max >= 0.5) {
+      window.removeEventListener("scroll", onScroll);
+      try {
+        if (readChoice("advertising") !== "denied") dispatch("trackCustom", "ScrollDepth50");
+      } catch {
+        /* ignore */
+      }
+    }
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
 }
 
 export function initMetaPixel() {
@@ -75,7 +96,7 @@ export function trackInitiateCheckout() {
   try {
     if (typeof window === "undefined" || typeof window.fbq !== "function") return;
     if (readChoice("advertising") === "denied") return;
-    dispatch("track", "InitiateCheckout");
+    dispatch("track", "InitiateCheckout", { content_name: "Wedding on a Budget", value: 27, currency: "USD" });
   } catch {
     // Tracking must never block checkout.
   }
