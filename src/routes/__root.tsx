@@ -12,6 +12,10 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { CookieBanner } from "../components/CookieBanner";
+import { initMetaPixel } from "../lib/meta-pixel";
+
+const CONSENT_DEFAULTS = "window.consentAskEverywhere = false;\nwindow.dataLayer = window.dataLayer || [];\nfunction gtag() {\n  dataLayer.push(arguments);\n}\nvar outsideConsentRegions = window.consentAskEverywhere === true ? \"denied\" : \"granted\";\ngtag(\"consent\", \"default\", {\n  analytics_storage: outsideConsentRegions,\n  ad_storage: outsideConsentRegions,\n  ad_user_data: outsideConsentRegions,\n  ad_personalization: outsideConsentRegions,\n});\ngtag(\"consent\", \"default\", {\n  analytics_storage: \"denied\",\n  ad_storage: \"denied\",\n  ad_user_data: \"denied\",\n  ad_personalization: \"denied\",\n  wait_for_update: 500,\n  region:\n    \"AT,BE,BG,HR,CY,CZ,DK,EE,FI,FR,DE,GR,HU,IE,IT,LV,LT,LU,MT,NL,PL,PT,RO,SK,SI,ES,SE,IS,LI,NO,GB,CH,RE,GP,MQ,GF,YT,MF,AX,CA-QC\".split(\n      \",\",\n    ),\n});\n(function () {\n  var signals = {\n    analytics: [\"analytics_storage\"],\n    advertising: [\"ad_storage\", \"ad_user_data\", \"ad_personalization\"],\n  };\n  for (var purpose in signals) {\n    var choice = null;\n    try {\n      var saved = JSON.parse(localStorage.getItem(\"cookie_consent_\" + purpose) || \"null\");\n      if (\n        saved &&\n        (saved.choice === \"denied\" || (saved.choice === \"granted\" && Date.now() - saved.at < 365 * 86400000))\n      ) {\n        choice = saved.choice;\n      }\n    } catch (e) {}\n    if (navigator.globalPrivacyControl === true) choice = \"denied\";\n    if (!choice) continue;\n    var update = {};\n    signals[purpose].forEach(function (signal) {\n      update[signal] = choice;\n    });\n    gtag(\"consent\", \"update\", update);\n  }\n})();\n";
 
 function NotFoundComponent() {
   return (
@@ -84,6 +88,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Wedding on a Budget" },
       { name: "description", content: "Plan your wedding for under $10,000." },
     ],
+    scripts: [{ children: CONSENT_DEFAULTS }],
     links: [
       {
         rel: "stylesheet",
@@ -117,11 +122,15 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    initMetaPixel();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <CookieBanner />
     </QueryClientProvider>
   );
 }

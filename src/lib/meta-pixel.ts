@@ -1,4 +1,4 @@
-import { canTrack, onConsentChange } from "@/lib/consent";
+import { canTrack, onConsentChange, readChoice } from "@/lib/consent";
 
 const PIXEL_ID = "28931126203182271";
 
@@ -21,12 +21,7 @@ let initialized = false;
 
 function dispatch(...args: unknown[]) {
   const fbq = window.fbq;
-  if (!fbq) return;
-  if (typeof fbq.callMethod === "function") {
-    fbq.callMethod.apply(fbq, args);
-  } else if (Array.isArray(fbq.queue)) {
-    fbq.queue.push(args);
-  }
+  if (typeof fbq === "function") fbq(...args);
 }
 
 function loadScript() {
@@ -41,18 +36,21 @@ function loadScript() {
 function initPixel() {
   if (initialized || typeof window === "undefined") return;
   initialized = true;
-  const existing = window.fbq;
-  const fbq = (
-    typeof existing === "function"
-      ? existing
-      : (...args: unknown[]) => {
-          dispatch(...args);
-        }
-  ) as Fbq;
-  if (!Array.isArray(fbq.queue)) fbq.queue = [];
-  if (typeof fbq.push !== "function") fbq.push = fbq;
-  window.fbq = fbq;
-  window._fbq = fbq;
+  if (typeof window.fbq !== "function") {
+    // Meta's standard base-code stub, so the SDK can drain the queue.
+    const n = function (this: unknown) {
+      // eslint-disable-next-line prefer-rest-params
+      const args = arguments;
+      if (n.callMethod) n.callMethod.apply(n, args as unknown as unknown[]);
+      else n.queue!.push(args as unknown as unknown[]);
+    } as unknown as Fbq;
+    n.push = n;
+    n.loaded = true;
+    n.version = "2.0";
+    n.queue = [];
+    window.fbq = n;
+    if (!window._fbq) window._fbq = n;
+  }
   loadScript();
   dispatch("init", PIXEL_ID, {}, { agent: "lovable" });
   dispatch("track", "PageView");
@@ -63,12 +61,22 @@ export function initMetaPixel() {
   void canTrack("advertising").then((allowed) => {
     if (allowed) initPixel();
   });
-  onConsentChange((purpose, granted) => {
-    if (purpose === "advertising" && granted) initPixel();
+  onConsentChange(() => {
+    if (readChoice("advertising") === "granted") {
+      if (initialized) dispatch("consent", "grant");
+      else initPixel();
+    } else if (initialized) {
+      dispatch("consent", "revoke");
+    }
   });
 }
 
 export function trackInitiateCheckout() {
-  if (typeof window === "undefined" || typeof window.fbq !== "function") return;
-  dispatch("track", "InitiateCheckout");
+  try {
+    if (typeof window === "undefined" || typeof window.fbq !== "function") return;
+    if (readChoice("advertising") === "denied") return;
+    dispatch("track", "InitiateCheckout");
+  } catch {
+    // Tracking must never block checkout.
+  }
 }

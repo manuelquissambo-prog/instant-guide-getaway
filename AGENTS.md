@@ -28,3 +28,4 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+- Meta Pixel loads only via src/lib/meta-pixel.ts, gated on advertising consent from src/lib/consent.ts; tracking calls are wrapped so blocked pixels never stop checkout links.

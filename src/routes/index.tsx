@@ -253,6 +253,7 @@ function Index() {
           <a href="#" className="hover:text-primary">Privacy Policy</a>
           <a href="#" className="hover:text-primary">Terms of Use</a>
           <a href="mailto:[YOUR EMAIL]" className="hover:text-primary">Contact ([YOUR EMAIL])</a>
+          <button type="button" onClick={() => window.dispatchEvent(new Event("open-cookie-settings"))} className="hover:text-primary">Cookie settings</button>
         </nav>
         <p className="mt-4">© 2026 Wedding on a Budget. All rights reserved.</p>
       </footer>
